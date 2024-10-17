@@ -1,0 +1,23 @@
+name: Delete Previous Day Users
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # 毎朝6時に実行
+
+jobs:
+  delete-users:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run batch to delete users
+        run: npx ts-node --esm ./batch/index.ts
