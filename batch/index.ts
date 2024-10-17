@@ -1,45 +1,32 @@
-import { createClient } from '@supabase/supabase-js';
-import { format, subDays } from 'date-fns';
-import dotenv from 'dotenv';
+import { supabase } from '../src/supabase'; // supabaseのインポート先を確認してください
 
-// 環境変数をロード
-dotenv.config();
+async function deleteAllUsers() {
+  try {
+    // `users` テーブルのすべてのレコードを削除
+    const { error: usersError } = await supabase
+      .from('users')
+      .delete()
+      .neq('id', ''); // 全てのユーザーを削除
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+    if (usersError) {
+      throw usersError;
+    }
 
-async function deletePreviousDayData() {
-  // 前日の日時を取得
-  const yesterday = subDays(new Date(), 1);
-  const formattedDate = format(yesterday, 'yyyy-MM-dd');
+    // `user_skill` テーブルのすべてのレコードを削除
+    const { error: userSkillsError } = await supabase
+      .from('user_skill')
+      .delete()
+      .neq('id', ''); // 全てのスキル情報を削除
 
-  // 前日作成された users のレコードを削除
-  const { data: usersData, error: usersError } = await supabase
-    .from('users')
-    .delete()
-    .eq('created_at', formattedDate);
+    if (userSkillsError) {
+      throw userSkillsError;
+    }
 
-  if (usersError) {
-    console.error('Error deleting users:', usersError);
-    return;
+    console.log('All users and user skills have been deleted successfully.');
+  } catch (error) {
+    console.error('Error deleting users or user skills:', error);
   }
-  console.log('Deleted users:', usersData);
-
-  // 前日作成された user_skill のレコードを削除
-  const { data: userSkillsData, error: userSkillsError } = await supabase
-    .from('user_skill')
-    .delete()
-    .eq('created_at', formattedDate);
-
-  if (userSkillsError) {
-    console.error('Error deleting user_skill:', userSkillsError);
-    return;
-  }
-  console.log('Deleted user_skill:', userSkillsData);
 }
 
-// バッチ処理を実行
-deletePreviousDayData().catch((error) => {
-  console.error('Error executing batch process:', error);
-});
+// 実行
+deleteAllUsers();
