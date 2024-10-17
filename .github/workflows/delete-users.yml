@@ -24,4 +24,4 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_KEY }}
-        run: node ./batch/index.mjs
+        run: npx tsx batch/index.ts
