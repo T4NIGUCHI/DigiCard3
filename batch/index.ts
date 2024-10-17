@@ -1,29 +1,37 @@
-import { supabase } from '../src/supabase';
+import { createClient } from '@supabase/supabase-js';
 
-async function deleteUsers() {
+// Supabaseクライアントの作成
+const supabaseUrl = process.env.VITE_SUPABASE_URL!;
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function deleteAllData() {
   try {
-    // usersテーブルの削除
-    const { error: userError } = await supabase
+    // usersテーブルの全データを削除
+    const { error: usersError } = await supabase
       .from('users')
       .delete()
-      .lt('created_at', new Date().toISOString())
-      .select('user_id');
+      .neq('id', null); // すべての行を削除するために条件を追加
 
-    if (userError) throw userError;
+    if (usersError) {
+      throw usersError;
+    }
 
-    // user_skillテーブルの削除
-    const { error: skillError } = await supabase
+    // user_skillテーブルの全データを削除
+    const { error: userSkillError } = await supabase
       .from('user_skill')
       .delete()
-      .lt('created_at', new Date().toISOString())
-      .select('user_id');
+      .neq('id', null); // すべての行を削除するために条件を追加
 
-    if (skillError) throw skillError;
+    if (userSkillError) {
+      throw userSkillError;
+    }
 
-    console.log('Users and user skills deleted successfully.');
+    console.log('All data from users and user_skill tables deleted successfully.');
   } catch (error) {
-    console.error('Error deleting users or user skills:', error);
+    console.error('Error deleting data:', error);
   }
 }
 
-deleteUsers();
+// 関数の実行
+deleteAllData();
