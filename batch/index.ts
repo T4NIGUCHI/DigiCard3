@@ -1,32 +1,29 @@
-import { supabase } from '../src/supabase'; // supabaseのインポート先を確認してください
+import { supabase } from '../src/supabase';
 
-async function deleteAllUsers() {
+async function deleteUsers() {
   try {
-    // `users` テーブルのすべてのレコードを削除
-    const { error: usersError } = await supabase
+    // usersテーブルの削除
+    const { error: userError } = await supabase
       .from('users')
       .delete()
-      .neq('id', ''); // 全てのユーザーを削除
+      .lt('created_at', new Date().toISOString())
+      .select('user_id');
 
-    if (usersError) {
-      throw usersError;
-    }
+    if (userError) throw userError;
 
-    // `user_skill` テーブルのすべてのレコードを削除
-    const { error: userSkillsError } = await supabase
+    // user_skillテーブルの削除
+    const { error: skillError } = await supabase
       .from('user_skill')
       .delete()
-      .neq('id', ''); // 全てのスキル情報を削除
+      .lt('created_at', new Date().toISOString())
+      .select('user_id');
 
-    if (userSkillsError) {
-      throw userSkillsError;
-    }
+    if (skillError) throw skillError;
 
-    console.log('All users and user skills have been deleted successfully.');
+    console.log('Users and user skills deleted successfully.');
   } catch (error) {
     console.error('Error deleting users or user skills:', error);
   }
 }
 
-// 実行
-deleteAllUsers();
+deleteUsers();
