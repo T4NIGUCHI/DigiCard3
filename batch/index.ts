@@ -7,24 +7,24 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function deleteAllData() {
   try {
-    // usersテーブルの全データを削除
-    const { error: usersError } = await supabase
-      .from('users')
-      .delete()
-      .neq('id', null); // すべての行を削除するために条件を追加
-
-    if (usersError) {
-      throw usersError;
-    }
-
     // user_skillテーブルの全データを削除
     const { error: userSkillError } = await supabase
       .from('user_skill')
       .delete()
-      .neq('id', null); // すべての行を削除するために条件を追加
+      .not('id', 'is', null); // idがnullでない行を削除
 
     if (userSkillError) {
       throw userSkillError;
+    }
+
+    // usersテーブルの全データを削除
+    const { error: usersError } = await supabase
+      .from('users')
+      .delete()
+      .not('user_id', 'is', null); // user_idがnullでない行を削除
+
+    if (usersError) {
+      throw usersError;
     }
 
     console.log('All data from users and user_skill tables deleted successfully.');
